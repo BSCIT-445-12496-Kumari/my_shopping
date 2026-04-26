@@ -1,0 +1,130 @@
+{% extends 'store/base.html' %}
+{% block title %}My Orders — My Shopping{% endblock %}
+
+{% block content %}
+<div class="page-header py-4 mb-2">
+    <div class="container">
+        <h2 class="page-title"><i class="bi bi-bag-check me-2 text-success"></i>My Orders</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Orders</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- ── FILTER TOGGLE ── -->
+    <div class="d-flex gap-2 mb-4">
+        <a href="{% url 'order_history' %}?filter=active"
+           class="btn {% if order_filter == 'active' %}btn-success{% else %}btn-outline-secondary{% endif %} btn-sm fw-semibold">
+            <i class="bi bi-bag-check me-1"></i>Active Orders
+        </a>
+        <a href="{% url 'order_history' %}?filter=cancelled"
+           class="btn {% if order_filter == 'cancelled' %}btn-danger{% else %}btn-outline-secondary{% endif %} btn-sm fw-semibold">
+            <i class="bi bi-x-circle me-1"></i>Cancelled Orders
+        </a>
+    </div>
+
+    {% if orders %}
+
+    {% for order in orders %}
+    <div class="order-card card border-0 shadow-sm mb-4">
+
+        <!-- Order Header -->
+        <div class="order-card-header d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 border-bottom">
+            <div>
+                <span class="order-id fw-bold">#ORD-{{ order.id|stringformat:"04d" }}</span>
+                <span class="text-muted ms-2 small">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <span class="payment-method-badge">
+                    <i class="bi bi-{% if order.payment_method == 'upi' %}phone{% elif order.payment_method == 'card' %}credit-card{% else %}cash-stack{% endif %} me-1"></i>
+                    {{ order.get_payment_method_display }}
+                </span>
+                <span class="status-badge status-{{ order.status }}">
+                    {% if order.status == 'pending' %}<i class="bi bi-clock me-1"></i>
+                    {% elif order.status == 'processing' %}<i class="bi bi-gear me-1"></i>
+                    {% elif order.status == 'shipped' %}<i class="bi bi-truck me-1"></i>
+                    {% elif order.status == 'delivered' %}<i class="bi bi-check-circle me-1"></i>
+                    {% elif order.status == 'cancelled' %}<i class="bi bi-x-circle me-1"></i>
+                    {% endif %}
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="card-body p-3">
+            {% for item in order.items.all %}
+            <div class="d-flex align-items-center gap-3 py-2 {% if not forloop.last %}border-bottom{% endif %}">
+                <div class="order-item-img">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                        <span>🛍️</span>
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold small">{{ item.product.name }}</div>
+                    <div class="text-muted small">Qty: {{ item.quantity }} × ₹{{ item.price }}</div>
+                </div>
+                <div class="fw-bold text-dark">₹{{ item.get_total_price }}</div>
+            </div>
+            {% endfor %}
+
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-2">
+                <span class="text-muted small">{{ order.items.count }} item{{ order.items.count|pluralize }}</span>
+                <span class="fw-bold fs-5 text-success">Total: ₹{{ order.total_amount }}</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-footer bg-white border-top py-2 px-3 d-flex gap-2 justify-content-end flex-wrap">
+            <a href="{% url 'home' %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i>Reorder
+            </a>
+
+            <!-- Cancel button only shown for pending or processing orders -->
+            {% if order.status == 'pending' or order.status == 'processing' %}
+            <form method="POST" action="{% url 'cancel_order' order.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-x-circle me-1"></i>Cancel Order
+            </button>
+            </form>
+            {% endif %}
+        </div>
+
+    </div>
+    {% endfor %}
+
+    {% else %}
+
+    <!-- Empty state — message adapts based on which tab is active -->
+    <div class="empty-state text-center py-5">
+        <div class="empty-icon mb-4">
+            {% if order_filter == 'cancelled' %}🚫{% else %}📦{% endif %}
+        </div>
+        <h4>
+            {% if order_filter == 'cancelled' %}No cancelled orders{% else %}No active orders{% endif %}
+        </h4>
+        <p class="text-muted">
+            {% if order_filter == 'cancelled' %}
+                You haven't cancelled any orders.
+            {% else %}
+                You have no active orders right now. Start shopping!
+            {% endif %}
+        </p>
+        {% if order_filter == 'active' %}
+        <a href="{% url 'home' %}" class="btn btn-success mt-2">
+            <i class="bi bi-bag-plus me-1"></i>Shop Now
+        </a>
+        {% endif %}
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends 'store/base.html' %}
+{% block title %}My Cart — My Shopping{% endblock %}
+
+{% block content %}
+
+<div class="page-header py-4 mb-2">
+    <div class="container">
+        <h2 class="page-title">
+            <i class="bi bi-cart3 me-2 text-success"></i>My Shopping Cart
+        </h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item active">Cart</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container pb-5">
+    {% if cart_items %}
+    <div class="row g-4">
+
+        <!-- ── CART ITEMS ── -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-600">
+                            {{ cart_items|length }} item{{ cart_items|length|pluralize }} in cart
+                        </span>
+                        <a href="{% url 'home' %}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-plus me-1"></i>Add More
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    {% for item in cart_items %}
+                    <div class="cart-item p-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="row align-items-center g-3">
+
+                            <!-- Image -->
+                            <div class="col-auto">
+                                <div class="cart-item-img-wrap">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}"
+                                             alt="{{ item.product.name }}"
+                                             class="cart-item-img">
+                                    {% else %}
+                                        <div class="cart-item-placeholder">🛒</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <div class="col">
+                                <h6 class="mb-1 fw-600">{{ item.product.name }}</h6>
+                                <span class="badge text-bg-light text-muted small">
+                                    {{ item.product.get_category_display }}
+                                </span>
+                                <p class="text-success fw-500 mb-0 mt-1">
+                                    ₹{{ item.product.price }} per unit
+                                </p>
+                            </div>
+
+                            <!-- Quantity Control -->
+                            <div class="col-auto">
+                                <form method="POST"
+                                      action="{% url 'update_cart' item.id %}"
+                                      class="d-flex align-items-center gap-2">
+                                    {% csrf_token %}
+                                    <div class="input-group qty-input-group">
+                                        <button class="btn btn-outline-secondary btn-sm qty-btn"
+                                                type="button"
+                                                onclick="let i=this.nextElementSibling;
+                                                         if(i.value>1){
+                                                             i.value=parseInt(i.value)-1;
+                                                             this.closest('form').submit();
+                                                         }">−</button>
+                                        <input type="number"
+                                               name="quantity"
+                                               value="{{ item.quantity }}"
+                                               min="1"
+                                               max="{{ item.product.stock }}"
+                                               class="form-control form-control-sm text-center qty-input">
+                                        <button class="btn btn-outline-secondary btn-sm qty-btn"
+                                                type="button"
+                                                onclick="let i=this.previousElementSibling;
+                                                         i.value=parseInt(i.value)+1;
+                                                         this.closest('form').submit();">+</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Item Total & Remove -->
+                            <div class="col-auto text-end">
+                                <div class="fw-700 text-dark">₹{{ item.get_total_price }}</div>
+                                <form method="POST"
+                                      action="{% url 'remove_from_cart' item.id %}"
+                                      class="mt-1">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="btn btn-link btn-sm text-danger p-0">
+                                        <i class="bi bi-trash me-1"></i>Remove
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ORDER SUMMARY ── -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top:90px;">
+                <div class="card-header bg-success text-white py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-receipt me-2"></i>Order Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+
+                    <div class="summary-row">
+                        <span>Subtotal ({{ cart_items|length }} items)</span>
+                        <span>₹{{ total }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Delivery Charges</span>
+                        <span class="{% if delivery_charge == 0 %}text-success fw-600{% endif %}">
+                            {% if delivery_charge == 0 %}
+                                FREE
+                            {% else %}
+                                ₹{{ delivery_charge }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if remaining_for_free_delivery > 0 %}
+                    <div class="free-delivery-hint">
+                        <i class="bi bi-truck me-1"></i>
+                        Add ₹{{ remaining_for_free_delivery }} more for free delivery!
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="summary-row total-row">
+                        <span class="fw-700">Grand Total</span>
+                        <span class="fw-700 fs-5 text-success">₹{{ grand_total }}</span>
+                    </div>
+
+                    <a href="{% url 'payment' %}" class="btn btn-checkout w-100 mt-3">
+                        <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+                    </a>
+
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="bi bi-arrow-left me-1"></i>Continue Shopping
+                    </a>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i>
+                            Secure checkout &nbsp;
+                            <i class="bi bi-lock text-success me-1"></i>
+                            Encrypted
+                        </small>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- ── EMPTY CART ── -->
+    <div class="empty-state text-center py-5">
+        <div class="empty-icon mb-4">🛒</div>
+        <h4>Your cart is empty</h4>
+        <p class="text-muted">Looks like you haven't added anything yet.</p>
+        <a href="{% url 'home' %}" class="btn btn-success mt-2">
+            <i class="bi bi-bag-plus me-1"></i>Start Shopping
+        </a>
+    </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

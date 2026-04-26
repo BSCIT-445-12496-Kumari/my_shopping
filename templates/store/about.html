@@ -1,0 +1,265 @@
+{% extends 'store/base.html' %}
+{% block title %}About Us — My Shopping{% endblock %}
+
+{% block content %}
+
+<!-- ── ABOUT HERO ── -->
+<section class="about-hero py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-6">
+                <span class="about-badge mb-3 d-inline-block">🌿 Est. 2020</span>
+                <h1 class="about-title">
+                    We Bring <span class="text-highlight">Fresh</span><br>To Your Door
+                </h1>
+                <p class="about-subtitle">
+                    FreshMart connects local farms directly with homes across India —
+                    fresh, fast, and affordable.
+                </p>
+                <a href="{% url 'home' %}" class="btn btn-success px-4 py-2 mt-3">
+                    <i class="bi bi-bag me-2"></i>Shop Now
+                </a>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="about-stats-grid">
+                    <div class="about-stat-card">
+                        <div class="stat-emoji">🏪</div>
+                        <div class="stat-num">10,000+</div>
+                        <div class="stat-lbl">Products</div>
+                    </div>
+                    <div class="about-stat-card highlight">
+                        <div class="stat-emoji">👨‍👩‍👧‍👦</div>
+                        <div class="stat-num">500K+</div>
+                        <div class="stat-lbl">Happy Customers</div>
+                    </div>
+                    <div class="about-stat-card">
+                        <div class="stat-emoji">🚚</div>
+                        <div class="stat-num">2M+</div>
+                        <div class="stat-lbl">Orders Delivered</div>
+                    </div>
+                    <div class="about-stat-card">
+                        <div class="stat-emoji">🌾</div>
+                        <div class="stat-num">300+</div>
+                        <div class="stat-lbl">Partner Farms</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── OUR STORY ── -->
+<section class="py-5 bg-light" id="our-story">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="section-title mb-4">Our Story</h2>
+                <p class="lead text-muted">
+                    Founded in 2026, FreshMart started with a simple mission — make fresh,
+                    quality groceries accessible to every Indian household. What began as a
+                    small team of 5 people in Delhi has grown into a nationwide platform
+                    serving over half a million customers.
+                </p>
+                <p class="text-muted">
+                    We partner directly with local farmers and producers, cutting out
+                    middlemen to bring you the freshest produce at the best prices.
+                    Every product on our platform is quality-checked before it reaches your door.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── WHY CHOOSE US ── -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Why Choose FreshMart?</h2>
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="value-card text-center p-4">
+                    <div class="value-icon mb-3">🌱</div>
+                    <h5 class="fw-700">Farm Fresh</h5>
+                    <p class="text-muted">
+                        Directly sourced from 300+ partner farms.
+                        No cold storage — always fresh.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-card text-center p-4">
+                    <div class="value-icon mb-3">⚡</div>
+                    <h5 class="fw-700">Lightning Fast</h5>
+                    <p class="text-muted">
+                        Same-day delivery in most cities.
+                        Order by 10 AM, get it by evening.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-card text-center p-4">
+                    <div class="value-icon mb-3">💚</div>
+                    <h5 class="fw-700">Quality Assured</h5>
+                    <p class="text-muted">
+                        Every product is quality-checked.
+                        Not happy? We'll replace or refund.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-card text-center p-4">
+                    <div class="value-icon mb-3">💰</div>
+                    <h5 class="fw-700">Best Prices</h5>
+                    <p class="text-muted">
+                        No middlemen means better prices for you
+                        and better profits for farmers.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-card text-center p-4">
+                    <div class="value-icon mb-3">🔒</div>
+                    <h5 class="fw-700">Secure &amp; Safe</h5>
+                    <p class="text-muted">
+                        Bank-grade encryption for all payments.
+                        Your data is always safe.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="value-card text-center p-4">
+                    <div class="value-icon mb-3">🎧</div>
+                    <h5 class="fw-700">24/7 Support</h5>
+                    <p class="text-muted">
+                        Our customer care team is always available
+                        to resolve any issue.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── TEAM SECTION ── -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Meet Our Team</h2>
+        <div class="row g-4 justify-content-center">
+
+            <div class="col-md-3 col-6">
+                <div class="team-card text-center p-4">
+                    <div class="team-avatar mb-3">👨‍💼</div>
+                    <h6 class="fw-700 mb-1">Rahul Kumar</h6>
+                    <small class="text-muted">Founder &amp; CEO</small>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="team-card text-center p-4">
+                    <div class="team-avatar mb-3">👩‍💻</div>
+                    <h6 class="fw-700 mb-1">Shubham Kumar</h6>
+                    <small class="text-muted">Head of Technology</small>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="team-card text-center p-4">
+                    <div class="team-avatar mb-3">👨‍🌾</div>
+                    <h6 class="fw-700 mb-1">Rampal Kumar</h6>
+                    <small class="text-muted">Supply Chain Head</small>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="team-card text-center p-4">
+                    <div class="team-avatar mb-3">👩‍🎨</div>
+                    <h6 class="fw-700 mb-1">Laddu Kumar</h6>
+                    <small class="text-muted">UI/UX Designer</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── CONTACT SECTION ── -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Get In Touch</h2>
+        <div class="row g-4 justify-content-center">
+
+            <div class="col-md-4">
+                <div class="contact-card text-center p-4">
+                    <div class="contact-icon mb-3">
+                        <i class="bi bi-geo-alt-fill text-success fs-1"></i>
+                    </div>
+                    <h6 class="fw-700">Our Address</h6>
+                    <p class="text-muted small mb-0">
+                        Kurji,chasma center, Food District,<br>
+                        patna - 80010, India
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="contact-card text-center p-4">
+                    <div class="contact-icon mb-3">
+                        <i class="bi bi-telephone-fill text-success fs-1"></i>
+                    </div>
+                    <h6 class="fw-700">Call Us</h6>
+                    <p class="text-muted small mb-0">
+                        +91 6205628253<br>
+                        Mon – Sat: 8AM – 10PM
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="contact-card text-center p-4">
+                    <div class="contact-icon mb-3">
+                        <i class="bi bi-envelope-fill text-success fs-1"></i>
+                    </div>
+                    <h6 class="fw-700">Email Us</h6>
+                    <p class="text-muted small mb-0">
+                        Rahulkumar@gmail.com<br>
+                        support@freshmart.in
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA BANNER ── -->
+<section class="about-cta py-5">
+    <div class="container">
+        <div class="cta-box text-center p-5">
+            <h3 class="fw-700 mb-3">Ready to Shop Fresh?</h3>
+            <p class="text-muted mb-4">
+                Join 500,000+ happy customers who shop smarter with FreshMart.
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'home' %}" class="btn btn-success btn-lg px-5">
+                    <i class="bi bi-basket2 me-2"></i>Start Shopping
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-outline-success btn-lg px-5">
+                    <i class="bi bi-person-plus me-2"></i>Create Account
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

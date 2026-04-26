@@ -1,0 +1,196 @@
+{% extends 'store/base.html' %}
+{% block title %}My Shopping — Fresh Groceries Online{% endblock %}
+
+{% block content %}
+
+{% if not query %}
+<!-- Hero Banner -->
+<section class="hero-section">
+    <div class="container position-relative">
+        <div class="row align-items-center" style="min-height:420px;">
+            <div class="col-lg-6 py-5">
+                <span class="hero-badge">🛒 Free delivery on orders above ₹500</span>
+                <h1 class="hero-title">Fresh Groceries<br><span class="text-highlight">Delivered Fast</span></h1>
+                <p class="hero-subtitle">Shop thousands of fresh products — fruits, vegetables, dairy, snacks and more.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="#products" class="btn btn-hero-primary"><i class="bi bi-bag-plus me-2"></i>Shop Now</a>
+                    <a href="{% url 'about' %}" class="btn btn-hero-outline">Learn More</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block py-5">
+                <div class="hero-emoji-grid">
+                    <span>🥦</span><span>🍎</span><span>🥛</span>
+                    <span>🍞</span><span>🥕</span><span>🍇</span>
+                    <span>🧀</span><span>🥑</span><span>🍋</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Strip -->
+<section class="features-strip py-3">
+    <div class="container">
+        <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+                <div class="feature-chip">
+                    <i class="bi bi-truck text-success"></i>
+                    <span>Free Delivery <small>Above ₹500</small></span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="feature-chip">
+                    <i class="bi bi-shield-check text-primary"></i>
+                    <span>Quality Assured <small>100% Fresh</small></span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="feature-chip">
+                    <i class="bi bi-arrow-return-left text-warning"></i>
+                    <span>Easy Returns <small>7-Day Policy</small></span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="feature-chip">
+                    <i class="bi bi-headset text-danger"></i>
+                    <span>24/7 Support <small>Always Here</small></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Products Section -->
+<section class="products-section py-5" id="products">
+    <div class="container">
+
+        {% if query %}
+        <div class="search-result-header mb-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <h3 class="section-title mb-1">Results for <span class="text-success">"{{ query }}"</span></h3>
+                    <p class="text-muted mb-0">{{ products|length }} product{{ products|length|pluralize }} found</p>
+                </div>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle me-1"></i>Clear Search
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <h2 class="section-title mb-0"><i class="bi bi-grid me-2 text-success"></i>Our Products</h2>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/" class="category-pill {% if not selected_category %}active{% endif %}">All</a>
+                {% for val, label in categories %}
+                <a href="/?category={{ val }}" class="category-pill {% if selected_category == val %}active{% endif %}">{{ label }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Admin banner — only visible to staff users -->
+        {% if user.is_staff %}
+        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-3 mb-4 py-2 px-3" role="alert">
+            <i class="bi bi-shield-lock fs-5"></i>
+            <div class="flex-grow-1">
+                <strong>Admin Mode:</strong> Edit and Delete buttons are visible on all product cards.
+            </div>
+            <a href="{% url 'admin_orders' %}" class="btn btn-warning btn-sm fw-semibold">
+                <i class="bi bi-clipboard-check me-1"></i>Manage Orders
+            </a>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        {% if no_results %}
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon mb-4">🔍</div>
+            <h4>No products found for "{{ query }}"</h4>
+            <p class="text-muted">Try different keywords or browse all our products.</p>
+            <a href="{% url 'home' %}" class="btn btn-success mt-2">
+                <i class="bi bi-arrow-left me-1"></i>Browse All Products
+            </a>
+        </div>
+
+        {% elif products %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+            {% for product in products %}
+            <div class="col">
+                <div class="product-card card h-100 border-0">
+                    <div class="product-img-wrapper">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="product-img" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="/static/images/default.png" class="product-img" alt="{{ product.name }}"
+                                 onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\'><rect fill=\'%23f8f9fa\' width=\'300\' height=\'200\'/><text fill=\'%23adb5bd\' font-size=\'40\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'>🛒</text></svg>'">
+                        {% endif %}
+                        <div class="product-badge">
+                            <span class="badge-category">{{ product.get_category_display }}</span>
+                        </div>
+                        {% if product.stock <= 5 and product.stock > 0 %}
+                        <div class="stock-badge">Only {{ product.stock }} left!</div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column p-3">
+                        <h6 class="product-name">{{ product.name }}</h6>
+                        {% if product.description %}
+                        <p class="product-desc text-muted small">{{ product.description|truncatewords:10 }}</p>
+                        {% endif %}
+                        <div class="mt-auto">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="product-price">₹{{ product.price }}</span>
+                                <span class="text-muted small"><i class="bi bi-box-seam me-1"></i>{{ product.stock }} left</span>
+                            </div>
+
+                            <!-- Add to Cart -->
+                            {% if user.is_authenticated %}
+                                {% if product.stock > 0 %}
+                                <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-add-cart w-100">
+                                        <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="bi bi-x-circle me-1"></i>Out of Stock
+                                </button>
+                                {% endif %}
+                            {% else %}
+                            <a href="{% url 'login' %}?next=/" class="btn btn-add-cart w-100">
+                                <i class="bi bi-person me-1"></i>Login to Buy
+                            </a>
+                            {% endif %}
+
+                            <!-- Admin Edit / Delete buttons -->
+                            {% if user.is_staff %}
+                            <div class="d-flex gap-2 mt-2">
+                                <a href="{% url 'edit_product' product.id %}"
+                                   class="btn btn-warning btn-sm flex-fill fw-semibold">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                                <a href="{% url 'delete_product' product.id %}"
+                                   class="btn btn-danger btn-sm flex-fill fw-semibold">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </a>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon mb-4">🛒</div>
+            <h4>No products available</h4>
+            <p class="text-muted">Check back soon — we're stocking up!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

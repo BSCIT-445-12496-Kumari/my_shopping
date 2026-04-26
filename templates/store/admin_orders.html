@@ -1,0 +1,110 @@
+{% extends 'store/base.html' %}
+{% block title %}Admin — Manage Orders | My Shopping{% endblock %}
+
+{% block content %}
+<div class="page-header py-4 mb-2">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="page-title mb-0">
+                    <i class="bi bi-clipboard-check me-2 text-success"></i>Manage Orders
+                </h2>
+                <nav aria-label="breadcrumb" class="mt-1">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item active">Admin Orders</li>
+                    </ol>
+                </nav>
+            </div>
+            <span class="badge bg-danger fs-6 px-3 py-2">
+                <i class="bi bi-shield-lock me-1"></i>Admin Panel
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    {% if orders %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-list-ul me-2 text-success"></i>All Orders
+                <span class="badge bg-secondary ms-2">{{ orders|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Order</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="pe-4 text-center">Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold">#ORD-{{ order.id|stringformat:"04d" }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold small">{{ order.user.get_full_name|default:order.user.username }}</div>
+                                <div class="text-muted" style="font-size:0.75rem;">{{ order.user.email }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ order.items.count }} item{{ order.items.count|pluralize }}
+                                </span>
+                            </td>
+                            <td class="fw-bold text-success">₹{{ order.total_amount }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-{% if order.payment_method == 'upi' %}phone{% elif order.payment_method == 'card' %}credit-card{% else %}cash-stack{% endif %} me-1"></i>
+                                    {{ order.get_payment_method_display }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ order.created_at|date:"d M Y" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ order.status }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <!-- Dropdown auto-submits on change -->
+                            <td class="pe-4 text-center">
+                                <form method="POST" action="{% url 'update_order_status' order.id %}" id="form-{{ order.id }}">
+                                    {% csrf_token %}
+                                    <select name="status"
+                                            class="form-select form-select-sm"
+                                            style="min-width:140px;"
+                                            onchange="document.getElementById('form-{{ order.id }}').submit();">
+                                        {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="empty-state text-center py-5">
+        <div class="empty-icon mb-4">📭</div>
+        <h4>No orders yet</h4>
+        <p class="text-muted">No orders have been placed yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

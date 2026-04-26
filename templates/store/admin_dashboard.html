@@ -1,0 +1,301 @@
+{% extends 'store/base.html' %}
+{% block title %}Admin Dashboard — My Shopping{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h3 class="mb-0 fw-600"><i class="bi bi-speedometer2 me-2 text-success"></i>Admin Dashboard</h3>
+            <small class="text-muted">Today: {{ today }}</small>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'report_csv' %}" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-filetype-csv me-1"></i>Export CSV
+            </a>
+            <a href="{% url 'report_print' %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-printer me-1"></i>Print Report
+            </a>
+            <a href="{% url 'admin_orders' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-bag-check me-1"></i>Manage Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-success bg-opacity-10 p-3"><i class="bi bi-box-seam text-success fs-4"></i></div>
+                    <div>
+                        <div class="text-muted small">Products</div>
+                        <div class="fs-4 fw-600">{{ total_products }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-primary bg-opacity-10 p-3"><i class="bi bi-bag text-primary fs-4"></i></div>
+                    <div>
+                        <div class="text-muted small">Total Orders</div>
+                        <div class="fs-4 fw-600">{{ total_orders }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-info bg-opacity-10 p-3"><i class="bi bi-people text-info fs-4"></i></div>
+                    <div>
+                        <div class="text-muted small">Users</div>
+                        <div class="fs-4 fw-600">{{ total_users }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-3 bg-warning bg-opacity-10 p-3"><i class="bi bi-currency-rupee text-warning fs-4"></i></div>
+                    <div>
+                        <div class="text-muted small">Total Revenue</div>
+                        <div class="fs-4 fw-600">₹{{ total_revenue|floatformat:0 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="small opacity-75">Today's Revenue</div>
+                    <div class="fs-2 fw-600">₹{{ today_revenue|floatformat:0 }}</div>
+                    <div class="small opacity-75">{{ today_order_count }} order{{ today_order_count|pluralize }} today</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body">
+                    <h6 class="mb-2 fw-600">Order Status Breakdown</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for key, val in status_counts.items %}
+                        <span class="badge rounded-pill
+                            {% if key == 'pending' %}bg-warning text-dark
+                            {% elif key == 'processing' %}bg-primary
+                            {% elif key == 'shipped' %}bg-info text-dark
+                            {% elif key == 'delivered' %}bg-success
+                            {% else %}bg-secondary{% endif %}
+                            px-3 py-2 fs-6">
+                            {{ key|capfirst }}: {{ val }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-graph-up me-2 text-success"></i>Revenue — Last 7 Days</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-pie-chart me-2 text-primary"></i>Top Products by Sales</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="productChart" height="160"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Product Report -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-table me-2 text-success"></i>Today's Product Sales</h6>
+                    <span class="badge bg-success">{{ today }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Qty Sold Today</th>
+                                    <th class="text-center">Remaining Stock</th>
+                                    <th class="text-center">Stock Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in today_items %}
+                                <tr>
+                                    <td class="fw-500">{{ item.product__name }}</td>
+                                    <td class="text-center">{{ item.sold }}</td>
+                                    <td class="text-center">{{ item.product__stock }}</td>
+                                    <td class="text-center">
+                                        {% if item.product__stock == 0 %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                        {% elif item.product__stock <= 5 %}
+                                        <span class="badge bg-warning text-dark">Low Stock</span>
+                                        {% else %}
+                                        <span class="badge bg-success">OK</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted py-4">No sales recorded today yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-danger text-white border-0 py-3">
+                    <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Low Stock Alert</h6>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for p in low_stock_products %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="small fw-500">{{ p.name }}</span>
+                            <span class="badge {% if p.stock == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %} rounded-pill">
+                                {{ p.stock }} left
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-success text-center py-3">
+                            <i class="bi bi-check-circle me-1"></i> All stocks healthy
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-600"><i class="bi bi-clock-history me-2 text-success"></i>Recent Orders</h6>
+            <a href="{% url 'admin_orders' %}" class="btn btn-sm btn-outline-success">View All</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in recent_orders %}
+                        <tr>
+                            <td class="fw-600">#{{ o.id }}</td>
+                            <td>{{ o.user.username }}</td>
+                            <td>₹{{ o.total_amount }}</td>
+                            <td>
+                                <span class="badge
+                                    {% if o.payment_status == 'success' %}bg-success
+                                    {% elif o.payment_status == 'failed' %}bg-danger
+                                    {% else %}bg-warning text-dark{% endif %}">
+                                    {{ o.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if o.status == 'delivered' %}bg-success
+                                    {% elif o.status == 'cancelled' %}bg-secondary
+                                    {% elif o.status == 'shipped' %}bg-info text-dark
+                                    {% elif o.status == 'processing' %}bg-primary
+                                    {% else %}bg-warning text-dark{% endif %}">
+                                    {{ o.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ o.created_at|date:"d M, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const revCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ daily_labels|safe }},
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: {{ daily_revenue|safe }},
+            backgroundColor: 'rgba(25,135,84,0.7)',
+            borderColor: 'rgba(25,135,84,1)',
+            borderWidth: 1,
+            borderRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => '₹'+v } } }
+    }
+});
+
+const prodCtx = document.getElementById('productChart').getContext('2d');
+new Chart(prodCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ prod_labels|safe }},
+        datasets: [{
+            data: {{ prod_qty|safe }},
+            backgroundColor: [
+                '#198754','#0d6efd','#ffc107','#dc3545',
+                '#0dcaf0','#6f42c1','#fd7e14','#20c997'
+            ],
+            borderWidth: 2,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+    }
+});
+</script>
+{% endblock %}

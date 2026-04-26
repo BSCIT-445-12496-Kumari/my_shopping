@@ -1,0 +1,481 @@
+<!-- ════════════════════════════════════════════════
+     FreshMart Chatbot Widget
+     Include this file in base.html before </body>
+════════════════════════════════════════════════ -->
+
+<style>
+/* ── Floating button ── */
+#fm-chat-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9990;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #198754, #20c997);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 20px rgba(25,135,84,.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+}
+#fm-chat-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(25,135,84,.55); }
+#fm-chat-btn .chat-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    background: #dc3545;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid #fff;
+}
+
+/* ── Chat window ── */
+#fm-chat-window {
+    position: fixed;
+    bottom: 98px;
+    right: 28px;
+    z-index: 9991;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    height: 520px;
+    max-height: calc(100vh - 120px);
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 12px 48px rgba(0,0,0,.18);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.92) translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s cubic-bezier(.34,1.56,.64,1);
+}
+#fm-chat-window.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ── Header ── */
+.fm-chat-header {
+    background: linear-gradient(135deg, #198754, #157347);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.fm-bot-avatar {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.fm-chat-header-info { flex: 1; }
+.fm-chat-header-info .bot-name { font-weight: 600; font-size: 15px; line-height: 1.2; }
+.fm-chat-header-info .bot-status { font-size: 11px; opacity: .85; display: flex; align-items: center; gap: 4px; }
+.fm-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #7dffb3; display: inline-block; }
+.fm-close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    opacity: .8;
+    line-height: 1;
+}
+.fm-close-btn:hover { opacity: 1; }
+
+/* ── Message area ── */
+#fm-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8f9fa;
+    scroll-behavior: smooth;
+}
+#fm-messages::-webkit-scrollbar { width: 4px; }
+#fm-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+/* ── Bubbles ── */
+.fm-msg { display: flex; align-items: flex-end; gap: 7px; max-width: 100%; }
+.fm-msg.bot { align-self: flex-start; }
+.fm-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+.fm-bubble {
+    padding: 9px 13px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    max-width: 82%;
+    word-break: break-word;
+}
+.fm-msg.bot .fm-bubble {
+    background: #fff;
+    color: #212529;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.fm-msg.user .fm-bubble {
+    background: #198754;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+.fm-msg-time { font-size: 10px; color: #aaa; flex-shrink: 0; margin-bottom: 2px; }
+
+.fm-avatar-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #198754;
+    color: #fff;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.fm-msg.user .fm-avatar-sm { background: #6c757d; }
+
+/* ── Product & order cards inside bubbles ── */
+.chat-product-card, .chat-order-card {
+    background: #f0faf4;
+    border-left: 3px solid #198754;
+    border-radius: 6px;
+    padding: 7px 10px;
+    margin: 5px 0;
+    font-size: 13px;
+}
+.chat-order-card { background: #f0f4ff; border-left-color: #0d6efd; }
+.fm-bubble a { color: #198754; font-weight: 500; }
+.fm-msg.user .fm-bubble a { color: #7dffb3; }
+
+/* ── Typing indicator ── */
+.fm-typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    background: #fff;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    width: fit-content;
+}
+.fm-typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #198754;
+    opacity: .4;
+    animation: fm-bounce .9s infinite;
+}
+.fm-typing span:nth-child(2) { animation-delay: .15s; }
+.fm-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes fm-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: .4; }
+    40%           { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ── Quick replies ── */
+.fm-quick-replies {
+    padding: 8px 12px 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    flex-shrink: 0;
+}
+.fm-quick-btn {
+    background: #fff;
+    border: 1px solid #198754;
+    color: #198754;
+    border-radius: 20px;
+    padding: 4px 11px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+}
+.fm-quick-btn:hover { background: #198754; color: #fff; }
+
+/* ── Input area ── */
+.fm-chat-input-area {
+    padding: 10px 12px;
+    background: #fff;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+#fm-user-input {
+    flex: 1;
+    border: 1.5px solid #dee2e6;
+    border-radius: 22px;
+    padding: 8px 14px;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color .2s;
+    resize: none;
+    max-height: 80px;
+    line-height: 1.4;
+}
+#fm-user-input:focus { border-color: #198754; }
+#fm-send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #198754;
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s, transform .15s;
+}
+#fm-send-btn:hover { background: #157347; transform: scale(1.05); }
+#fm-send-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+@media (max-width: 480px) {
+    #fm-chat-window { right: 10px; left: 10px; width: auto; bottom: 90px; }
+    #fm-chat-btn    { right: 16px; bottom: 20px; }
+}
+</style>
+
+<!-- Floating Button -->
+<button id="fm-chat-btn" onclick="fmToggleChat()" title="Chat with us">
+    <i class="bi bi-chat-dots-fill" id="fm-chat-icon"></i>
+    <div class="chat-badge" id="fm-chat-badge" style="display:none">1</div>
+</button>
+
+<!-- Chat Window -->
+<div id="fm-chat-window">
+
+    <!-- Header -->
+    <div class="fm-chat-header">
+        <div class="fm-bot-avatar">🛒</div>
+        <div class="fm-chat-header-info">
+            <div class="bot-name">FreshMart Assistant</div>
+            <div class="bot-status">
+                <span class="fm-status-dot"></span> Online — always here to help
+            </div>
+        </div>
+        <button class="fm-close-btn" onclick="fmToggleChat()" title="Close">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Messages -->
+    <div id="fm-messages">
+        <!-- Welcome message injected by JS -->
+    </div>
+
+    <!-- Quick Reply Buttons -->
+    <div class="fm-quick-replies" id="fm-quick-replies">
+        <button class="fm-quick-btn" onclick="fmQuickSend('Store timings')">🕐 Timings</button>
+        <button class="fm-quick-btn" onclick="fmQuickSend('Payment methods')">💳 Payment</button>
+        <button class="fm-quick-btn" onclick="fmQuickSend('My order status')">📦 My Orders</button>
+        <button class="fm-quick-btn" onclick="fmQuickSend('Delivery charges')">🚚 Delivery</button>
+        <button class="fm-quick-btn" onclick="fmQuickSend('How to place order')">🛒 How to order</button>
+        <button class="fm-quick-btn" onclick="fmQuickSend('Return policy')">🔄 Returns</button>
+    </div>
+
+    <!-- Input -->
+    <div class="fm-chat-input-area">
+        <textarea id="fm-user-input" placeholder="Type a message..." rows="1"
+                  onkeydown="fmHandleKey(event)" oninput="fmAutoResize(this)"></textarea>
+        <button id="fm-send-btn" onclick="fmSend()" title="Send">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    const CHATBOT_URL = '/chatbot/';
+    let isOpen        = false;
+    let isTyping      = false;
+    let msgCount      = 0;
+    const getCsrf     = () => document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+    const msgs        = () => document.getElementById('fm-messages');
+    const input       = () => document.getElementById('fm-user-input');
+    const sendBtn     = () => document.getElementById('fm-send-btn');
+
+    // ── Time helper ───────────────────────────────────────────────────────────
+    function now() {
+        return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── Append a message bubble ───────────────────────────────────────────────
+    function appendMsg(html, type /* 'bot' | 'user' */) {
+        const wrap = document.createElement('div');
+        wrap.className = `fm-msg ${type}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'fm-avatar-sm';
+        avatar.innerHTML = type === 'bot' ? '🛒' : '<i class="bi bi-person-fill"></i>';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'fm-bubble';
+        bubble.innerHTML = html;
+
+        const time = document.createElement('div');
+        time.className = 'fm-msg-time';
+        time.textContent = now();
+
+        if (type === 'bot') {
+            wrap.append(avatar, bubble, time);
+        } else {
+            wrap.append(time, bubble, avatar);
+        }
+
+        msgs().appendChild(wrap);
+        scrollBottom();
+        msgCount++;
+    }
+
+    // ── Typing indicator ──────────────────────────────────────────────────────
+    function showTyping() {
+        if (isTyping) return;
+        isTyping = true;
+        const wrap = document.createElement('div');
+        wrap.className = 'fm-msg bot';
+        wrap.id = 'fm-typing-row';
+        wrap.innerHTML =
+            '<div class="fm-avatar-sm">🛒</div>' +
+            '<div class="fm-typing"><span></span><span></span><span></span></div>';
+        msgs().appendChild(wrap);
+        scrollBottom();
+    }
+
+    function hideTyping() {
+        const el = document.getElementById('fm-typing-row');
+        if (el) el.remove();
+        isTyping = false;
+    }
+
+    // ── Scroll to bottom ──────────────────────────────────────────────────────
+    function scrollBottom() {
+        const m = msgs();
+        m.scrollTop = m.scrollHeight;
+    }
+
+    // ── Send message ──────────────────────────────────────────────────────────
+    window.fmSend = function () {
+        const text = input().value.trim();
+        if (!text) return;
+
+        appendMsg(text.replace(/</g, '&lt;'), 'user');
+        input().value = '';
+        input().style.height = 'auto';
+        sendBtn().disabled = true;
+
+        showTyping();
+
+        // Simulate slight delay for realism
+        const delay = 500 + Math.random() * 600;
+        setTimeout(() => {
+            fetch(CHATBOT_URL, {
+                method:  'POST',
+                headers: {
+                    'Content-Type':  'application/json',
+                    'X-CSRFToken':   getCsrf(),
+                },
+                body: JSON.stringify({ message: text }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideTyping();
+                appendMsg(data.reply || '⚠️ No response received.', 'bot');
+            })
+            .catch(() => {
+                hideTyping();
+                appendMsg('⚠️ Connection error. Please try again.', 'bot');
+            })
+            .finally(() => {
+                sendBtn().disabled = false;
+                input().focus();
+            });
+        }, delay);
+    };
+
+    // ── Quick reply ───────────────────────────────────────────────────────────
+    window.fmQuickSend = function (text) {
+        input().value = text;
+        fmSend();
+    };
+
+    // ── Key handler (Enter to send, Shift+Enter for newline) ─────────────────
+    window.fmHandleKey = function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            fmSend();
+        }
+    };
+
+    // ── Auto-resize textarea ──────────────────────────────────────────────────
+    window.fmAutoResize = function (el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+    };
+
+    // ── Toggle open/close ─────────────────────────────────────────────────────
+    window.fmToggleChat = function () {
+        isOpen = !isOpen;
+        const win  = document.getElementById('fm-chat-window');
+        const icon = document.getElementById('fm-chat-icon');
+        const badge = document.getElementById('fm-chat-badge');
+
+        win.classList.toggle('open', isOpen);
+        icon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-chat-dots-fill';
+        badge.style.display = 'none';
+
+        if (isOpen && msgCount === 0) {
+            // First open — show welcome message
+            appendMsg(
+                "👋 Hi! I'm <b>FreshMart Assistant</b>.<br>" +
+                "I can help you with products, orders, timings, and more!<br>" +
+                "How can I help you today?",
+                'bot'
+            );
+        }
+        if (isOpen) setTimeout(() => input().focus(), 300);
+    };
+
+    // ── Show badge after 3s to draw attention ─────────────────────────────────
+    setTimeout(() => {
+        if (!isOpen) {
+            document.getElementById('fm-chat-badge').style.display = 'flex';
+        }
+    }, 3000);
+
+})();
+</script>

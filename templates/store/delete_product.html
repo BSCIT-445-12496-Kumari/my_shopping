@@ -1,0 +1,74 @@
+{% extends 'store/base.html' %}
+{% block title %}Delete — {{ product.name }} | My Shopping{% endblock %}
+
+{% block content %}
+<div class="page-header py-4 mb-2">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="page-title mb-0">
+                    <i class="bi bi-trash me-2 text-danger"></i>Delete Product
+                </h2>
+                <nav aria-label="breadcrumb" class="mt-1">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item active">Delete Product</li>
+                    </ol>
+                </nav>
+            </div>
+            <span class="badge bg-danger fs-6 px-3 py-2">
+                <i class="bi bi-shield-lock me-1"></i>Admin Only
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-top: 4px solid #dc3545 !important;">
+                <div class="card-body p-4 text-center">
+
+                    <div style="font-size:3.5rem;margin-bottom:1rem;">⚠️</div>
+                    <h4 class="fw-bold text-danger mb-2">Confirm Deletion</h4>
+                    <p class="text-muted mb-4">
+                        You are about to permanently delete this product.<br>
+                        <strong>This action cannot be undone.</strong>
+                    </p>
+
+                    <!-- Product preview -->
+                    <div class="card border bg-light mb-4 text-start">
+                        <div class="card-body d-flex align-items-center gap-3 py-3">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                 style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid #dee2e6;">
+                            {% else %}
+                            <div style="width:64px;height:64px;border-radius:10px;background:#fff;border:1px solid #dee2e6;display:flex;align-items:center;justify-content:center;font-size:2rem;">🛒</div>
+                            {% endif %}
+                            <div>
+                                <div class="fw-bold fs-6">{{ product.name }}</div>
+                                <div class="text-muted small">{{ product.get_category_display }}</div>
+                                <div class="text-success fw-semibold">₹{{ product.price }}</div>
+                                <div class="text-muted small">Stock: {{ product.stock }} units</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <!-- POST form — safe deletion, no accidental GET triggers -->
+                        <form method="POST" action="{% url 'delete_product' product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger fw-semibold px-4">
+                                <i class="bi bi-trash me-2"></i>Yes, Delete Product
+                            </button>
+                        </form>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
