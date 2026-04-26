@@ -61,8 +61,8 @@
             {% for item in order.items.all %}
             <div class="d-flex align-items-center gap-3 py-2 {% if not forloop.last %}border-bottom{% endif %}">
                 <div class="order-item-img">
-                    {% if item.product.image %}
-                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                    {% if item.product.image_url %}
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
                     {% else %}
                         <span>🛍️</span>
                     {% endif %}

@@ -29,8 +29,8 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3 px-4">
                     <div class="d-flex align-items-center gap-3">
-                        {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}"
                              style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #dee2e6;">
                         {% else %}
                         <div style="width:48px;height:48px;border-radius:8px;background:#f8f9fa;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🛒</div>
@@ -79,10 +79,10 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold"><i class="bi bi-image me-1 text-success"></i>Product Image</label>
-                            {% if product.image %}
+                            {% if product.image_url %}
                             <div class="mb-2">
                                 <small class="text-muted">Current image:</small><br>
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}"
                                      style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;margin-top:4px;">
                             </div>
                             <small class="text-muted d-block mb-1">Upload a new image to replace (leave blank to keep current).</small>

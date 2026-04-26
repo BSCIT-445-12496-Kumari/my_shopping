@@ -118,8 +118,8 @@
             <div class="col">
                 <div class="product-card card h-100 border-0">
                     <div class="product-img-wrapper">
-                        {% if product.image %}
-                            <img src="{{ product.image.url }}" class="product-img" alt="{{ product.name }}">
+                        {% if product.image_url %}
+                            <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
                         {% else %}
                             <img src="/static/images/default.png" class="product-img" alt="{{ product.name }}"
                                  onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\'><rect fill=\'%23f8f9fa\' width=\'300\' height=\'200\'/><text fill=\'%23adb5bd\' font-size=\'40\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'>🛒</text></svg>'">

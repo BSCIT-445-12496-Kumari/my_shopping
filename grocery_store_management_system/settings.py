@@ -45,10 +45,6 @@ INSTALLED_APPS = [
     'store',
 ]
 
-# Add Cloudinary if URL is provided (for production media storage)
-if 'CLOUDINARY_URL' in os.environ:
-    INSTALLED_APPS.insert(0, 'cloudinary_storage')
-    INSTALLED_APPS.insert(0, 'cloudinary')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -138,8 +134,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-if 'CLOUDINARY_URL' in os.environ:
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

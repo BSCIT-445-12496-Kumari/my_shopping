@@ -43,8 +43,8 @@
                             <!-- Image -->
                             <div class="col-auto">
                                 <div class="cart-item-img-wrap">
-                                    {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}"
+                                    {% if item.product.image_url %}
+                                        <img src="{{ item.product.image_url }}"
                                              alt="{{ item.product.name }}"
                                              class="cart-item-img">
                                     {% else %}
@@ -73,7 +73,7 @@
                                     <div class="input-group qty-input-group">
                                         <button class="btn btn-outline-secondary btn-sm qty-btn"
                                                 type="button"
-                                                onclick="let i=this.nextElementSibling;
+                                                onclick="var i=this.nextElementSibling;
                                                          if(i.value>1){
                                                              i.value=parseInt(i.value)-1;
                                                              this.closest('form').submit();
@@ -86,7 +86,7 @@
                                                class="form-control form-control-sm text-center qty-input">
                                         <button class="btn btn-outline-secondary btn-sm qty-btn"
                                                 type="button"
-                                                onclick="let i=this.previousElementSibling;
+                                                onclick="var i=this.previousElementSibling;
                                                          i.value=parseInt(i.value)+1;
                                                          this.closest('form').submit();">+</button>
                                     </div>

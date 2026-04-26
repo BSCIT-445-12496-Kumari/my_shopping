@@ -36,12 +36,13 @@ class LoginForm(AuthenticationForm):
 class ProductForm(forms.ModelForm):
     class Meta:  #class meta is inner class jo model ko extra configuration/ behavious provide krne ke liye use hota hai 
         model = Product
-        fields = ['name', 'description', 'price', 'stock', 'category', 'image', 'is_available']
+        fields = ['name', 'description', 'price', 'stock', 'category', 'image_url', 'is_available']
         widgets = {
             'name':        forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'price':       forms.NumberInput(attrs={'class': 'form-control'}),
             'stock':       forms.NumberInput(attrs={'class': 'form-control'}),
             'category':    forms.Select(attrs={'class': 'form-select'}),
+            'image_url':   forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
             'is_available':forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
